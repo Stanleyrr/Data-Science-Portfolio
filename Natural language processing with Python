@@ -140,7 +140,15 @@ for z in id_num:
     df.to_excel(writer, sheet_name= "Sheet1")
     writer.save()
 
-          
+    #Output:
+    
+    '''
+    ID 1 has semantic score of 0.0907423604499892.
+    ID 2 has semantic score of 0.08117819671809635.
+    ID 3 has semantic score of 0.08410006697716932.
+    ID 4 has semantic score of 0.0797541288872446.
+    ID 5 has semantic score of 0.11250593514344237.
+    '''
 
 
 
