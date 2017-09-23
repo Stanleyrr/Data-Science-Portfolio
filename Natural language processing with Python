@@ -1,0 +1,159 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Sep 23 19:39:13 2017
+
+@author: stanleyruan
+"""
+
+from __future__ import division
+
+import pandas as pd
+from datetime import datetime
+now = datetime.now()
+import datetime as dt
+import xlsxwriter
+
+#import time
+import re
+
+import nltk
+from nltk.corpus import wordnet as wn
+from nltk.corpus.reader import NOUN
+from nltk import word_tokenize, pos_tag
+from nltk.stem.wordnet import WordNetLemmatizer
+Lem = WordNetLemmatizer()
+
+date = dt.datetime.today().strftime("%m_%d_%Y")
+    
+main_directory = 'C:/Users/Shaolun/Downloads/sample_semantic_analysis.csv'    
+
+whole_full=pd.read_csv(main_directory, encoding='ISO-8859-1', index_col=None, low_memory=False)
+ 
+colnames = ['id', 'industry', 'company_name']    
+data_new=whole_full[colnames]
+data_new=data_new.dropna(axis=0)
+
+data_new['industry'] = data_new['industry'].map(lambda x: re.sub(r'\W+', ' ', x))
+
+data_new['company_name'] = data_new['company_name'].map(lambda x: re.sub(r'\W+', ' ', x))
+
+data_new=data_new.sort_values(by='id').reset_index(drop=True)
+data_new['id']=data_new['id'].apply(str)
+
+data_new['industry']=data_new.industry.str.lower()
+data_new['company_name']=data_new.company_name.str.lower()
+
+df = pd.DataFrame([])    
+
+id_num = ['1', '2', '3', '4', '5']
+for z in id_num:    
+    audit=data_new.loc[(data_new.id == z)] 
+    audit=audit.reset_index(drop=True)
+    
+    company = dict()
+    industry = dict()
+    final=[]
+    for index, row in audit.iterrows():
+             company[index] = row['company_name']
+             industry[index] = row['industry']
+             
+             words = company[index].split()
+             company[index]=['not']
+             for word in words:
+                 a=wn._morphy(word, wn.NOUN)
+                 if len(a) >1:
+                     b=a[1]
+                     company[index].append(b)
+                 elif len(a)==1:
+                     b=" ".join(a)
+                     company[index].append(b)
+                 elif len(a)==0:
+                     pass
+                 
+             company[index]=" ".join(company[index])
+             words = company[index].split()
+             company[index]=['not']
+             for word in words:
+                 lemword = Lem.lemmatize(word)
+                 company[index].append(lemword)
+                                
+             a1 = list()
+             for w in company[index]:
+                 a1 = [item for item in company[index] if len(wn.synsets(item)) > 0] 
+                 a1 = [item for item in a1 if wn.synsets(item)[0].pos()=='n']
+                                
+             words = industry[index].split()
+             industry[index]=['not']
+             for word in words:
+                 a=wn._morphy(word, wn.NOUN)
+                 if len(a) > 1:
+                     b=a[1]
+                     industry[index].append(b)
+                 elif len(a)==1:
+                     b=" ".join(a)
+                     industry[index].append(b)
+                 elif len(a)==0:
+                     pass
+                 
+                
+             industry[index]=" ".join(industry[index])
+             words = industry[index].split()
+             industry[index]=['not']
+             for word in words:
+                 lemword = Lem.lemmatize(word)
+                 industry[index].append(lemword)   
+                 
+             a2 = list()
+             for w in industry[index]:
+                 a2 = [item for item in industry[index] if len(wn.synsets(item)) > 0] 
+                 a2 = [item for item in a2 if wn.synsets(item)[0].pos()=='n']
+                  
+             company_broken_down = dict()
+             category_broken_down = dict()
+             semantic_sim = dict()
+    
+             for x in range(len(a1)):
+                    company_broken_down[x] = wn.synset(a1[x] + '.n.01')
+                    for y in range(len(a2)):
+                        category_broken_down[y] = wn.synset(a2[y] + '.n.01')
+                        if len(a1)>len(a2):
+                            semantic_sim[x*len(a2) + y]=wn.path_similarity(company_broken_down[x], category_broken_down[y])
+                        else:
+                            semantic_sim[y*len(a1) + x]=wn.path_similarity(company_broken_down[x], category_broken_down[y])     
+             count=0
+             _sum=0
+             
+             for key in semantic_sim:
+                count += 1
+                _sum += semantic_sim[key]
+                single_ave =_sum/count
+             
+             final.append(single_ave)
+             score=sum(final)/len(final)
+             
+    print('ID ' + z + ' has semantic score of ' + str(score) + '.')
+    semantic_df = pd.DataFrame({'id': z,'semantic_score': score},{'stats':z})
+    df = df.append(semantic_df)
+
+    writer = pd.ExcelWriter('C:/Users/Shaolun/Downloads/semantic_summary_' + date + '_' + str(now.hour) + '_' + str(now.minute) + '.xlsx', engine='xlsxwriter')
+    df.to_excel(writer, sheet_name= "Sheet1")
+    writer.save()
+
+          
+
+
+
+
+
+
+
+
+          
+
+
+
+
+
+
+
