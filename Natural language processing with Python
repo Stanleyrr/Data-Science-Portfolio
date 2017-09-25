@@ -26,7 +26,8 @@ Lem = WordNetLemmatizer()
 
 date = dt.datetime.today().strftime("%m_%d_%Y")
     
-main_directory = 'C:/Users/Shaolun/Downloads/sample_semantic_analysis.csv'    
+main_directory = 'C:/Users/Shaolun/Downloads/sample_semantic_analysis.csv'
+#File 'sample_semantic_analysis.csv' is attached in the comment section.
 
 whole_full=pd.read_csv(main_directory, encoding='ISO-8859-1', index_col=None, low_memory=False)
  
