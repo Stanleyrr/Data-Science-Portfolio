@@ -26,31 +26,34 @@ Lem = WordNetLemmatizer()
 
 date = dt.datetime.today().strftime("%m_%d_%Y")
     
-main_directory = 'C:/Users/Shaolun/Downloads/sample_semantic_analysis.csv'
+#Update the directory path to your prefered directory path. Then specify where and how to read the CSV.    
 
+main_directory = '/Users/stanleyruan/Downloads/sample_semantic_analysis.csv'    
 whole_full=pd.read_csv(main_directory, encoding='ISO-8859-1', index_col=None, low_memory=False)
- 
+
+#Specify the column names 
 colnames = ['id', 'industry', 'company_name']    
 data_new=whole_full[colnames]
 data_new=data_new.dropna(axis=0)
 
+#Make each word in 'industry' and 'country_name' columns lower case if they are not already. Also remove special characters because if they are there, Python would throw and error since it won't be able to recognize the word
 data_new['industry'] = data_new['industry'].map(lambda x: re.sub(r'\W+', ' ', x))
-
 data_new['company_name'] = data_new['company_name'].map(lambda x: re.sub(r'\W+', ' ', x))
-
 data_new=data_new.sort_values(by='id').reset_index(drop=True)
 data_new['id']=data_new['id'].apply(str)
-
 data_new['industry']=data_new.industry.str.lower()
 data_new['company_name']=data_new.company_name.str.lower()
 
+#Convert the dataset to a dataframe for optimal data cleaning
 df = pd.DataFrame([])    
 
+#Put the ID numbers into a list and then assign data associated with each ID into separate audit datasets so that the script will analyze an aggregate semantic score for each audit dataset (in other words, for each ID)
 id_num = ['1', '2', '3', '4', '5']
 for z in id_num:    
     audit=data_new.loc[(data_new.id == z)] 
     audit=audit.reset_index(drop=True)
     
+    #Convert company names and industries to lists for convenient data munging
     company = dict()
     industry = dict()
     final=[]
@@ -70,7 +73,8 @@ for z in id_num:
                      company[index].append(b)
                  elif len(a)==0:
                      pass
-                 
+             
+             #Pick only nouns from the company names. The 'wn._morphy' function below converts plural nouns to singular form (As far as I know, Python semantic analysis only works with singular nouns)   
              company[index]=" ".join(company[index])
              words = company[index].split()
              company[index]=['not']
@@ -112,7 +116,8 @@ for z in id_num:
              company_broken_down = dict()
              category_broken_down = dict()
              semantic_sim = dict()
-    
+             
+             #Calculate semantic scores with the 'wn.path_similarity' function
              for x in range(len(a1)):
                     company_broken_down[x] = wn.synset(a1[x] + '.n.01')
                     for y in range(len(a2)):
@@ -132,13 +137,16 @@ for z in id_num:
              final.append(single_ave)
              score=sum(final)/len(final)
              
+    #Print out the semantic scores of each ID
     print('ID ' + z + ' has semantic score of ' + str(score) + '.')
     semantic_df = pd.DataFrame({'id': z,'semantic_score': score},{'stats':z})
     df = df.append(semantic_df)
 
-    writer = pd.ExcelWriter('C:/Users/Shaolun/Downloads/semantic_summary_' + date + '_' + str(now.hour) + '_' + str(now.minute) + '.xlsx', engine='xlsxwriter')
+    #Export the output to an Excel workbook
+    writer = pd.ExcelWriter('/Users/stanleyruan/Downloads/semantic_sim_summary_' + date + '_' + str(now.hour) + '_' + str(now.minute) + '.xlsx', engine='xlsxwriter')
     df.to_excel(writer, sheet_name= "Sheet1")
     writer.save()
+
 
     #Output:
     
