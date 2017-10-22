@@ -1,0 +1,52 @@
+from __future__ import division
+
+import pandas as pd
+import numpy as np
+import sys
+from datetime import datetime
+now = datetime.now()
+import math
+import timeit
+import datetime as dt
+import time
+import os
+import glob
+
+import urllib
+import urllib.request
+from urllib.request import urlopen
+from zipfile import ZipFile
+import json
+import collections
+from collections import Counter
+
+pd.options.mode.chained_assignment = None
+pd.set_option('max_rows', 400)
+
+date = dt.datetime.today().strftime("%m_%d_%Y")
+
+id_number = [119]
+
+for x in id_number:    
+    main_directory = '/Users/stanleyruan/Downloads/' + str(x)    
+    if not os.path.exists(main_directory): 
+        os.mkdir(main_directory)
+  
+    list_of_full_reports = glob.glob(main_directory + '/f' + str(x) + '*.csv')
+    full_report = max(list_of_full_reports, key=os.path.getctime)
+    whole_full=pd.read_csv(full_report, encoding='ISO-8859-1', index_col=None, low_memory=False).replace(np.nan, 'blank', regex=True)
+    scammer_list=glob.glob(main_directory + '/review_1192046.csv')
+    scammer_list = max(scammer_list, key = os.path.getctime)
+    scammer_list=pd.read_csv(scammer_list, encoding='ISO-8859-1', index_col=None, low_memory=False).replace(np.nan, 'blank', regex=True)    
+                              
+    scammer_audit = whole_full[whole_full._worker_id.isin(scammer_list._worker_id)].reset_index(drop=True)
+    
+    #'size' is the number of random judgments you want to draw from each contributor in the audit. You can set the size to any number you want.
+    size = 10
+    replace = False
+    fn = lambda obj: obj.loc[np.random.choice(obj.index, size, replace),:]
+    final_audit=scammer_audit.groupby('_worker_id', as_index=False).apply(fn)    
+    
+    writer = pd.ExcelWriter(main_directory + '/full_report_audit' + date + '_' + str(now.hour) + '_' + str(now.minute) + '_' + str(x) + '.xlsx', engine='xlsxwriter', options={'strings_to_urls': False})
+    final_audit.to_excel(writer, sheet_name= "Sheet1")
+    writer.save()
