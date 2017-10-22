@@ -29,7 +29,7 @@ for x in document_number:
         except ValueError:
             shutil.move(full_report, unzipped_directory)
 
-#Line 33 to 51 deals with unzipped file names that start with 'f'.        
+#Line 33 to 51 deals with unzipped file names that start with 'a'.        
     list_of_unzipped_agg_reports = glob.glob(main_directory + '/a' + str(x) + '*.zip')
     file_name = max(list_of_unzipped_agg_reports, key=os.path.getctime)
     with ZipFile(file_name, 'r') as zip:
