@@ -28,25 +28,37 @@ date = dt.datetime.today().strftime("%m_%d_%Y")
 id_number = [119]
 
 for x in id_number:    
+    #'main_directory' is the directory path where you keep the files that relate to the id_number.
     main_directory = '/Users/stanleyruan/Downloads/' + str(x)    
+    #Line 34-35 checks if the file path exists. If not, it will create one.
     if not os.path.exists(main_directory): 
         os.mkdir(main_directory)
-  
-    list_of_full_reports = glob.glob(main_directory + '/f' + str(x) + '*.csv')
-    full_report = max(list_of_full_reports, key=os.path.getctime)
-    whole_full=pd.read_csv(full_report, encoding='ISO-8859-1', index_col=None, low_memory=False).replace(np.nan, 'blank', regex=True)
-    scammer_list=glob.glob(main_directory + '/review_1192046.csv')
-    scammer_list = max(scammer_list, key = os.path.getctime)
-    scammer_list=pd.read_csv(scammer_list, encoding='ISO-8859-1', index_col=None, low_memory=False).replace(np.nan, 'blank', regex=True)    
-                              
-    scammer_audit = whole_full[whole_full._worker_id.isin(scammer_list._worker_id)].reset_index(drop=True)
     
-    #'size' is the number of random judgments you want to draw from each contributor in the audit. You can set the size to any number you want.
+    #Assuming that the actual ID file names start with a 'f', the 'list_of_full_ID_reports' variable stores the names of all files inside the main directory that are named 'f' followed by the id number, followed by any other character(s) and then '.csv'. 
+    list_of_full_ID_reports = glob.glob(main_directory + '/f' + str(x) + '*.csv')
+    #The 'full_report' variable in line 40 gets the path of the file from 'list_of_full_ID_reports' that has the latest modification time, meaning the newest file from that list. 
+    full_report = max(list_of_full_ID_reports, key=os.path.getctime)
+    #'whole_full' reads that 'full_report' into a Pandas dataframe for optimal data munging.
+    whole_full=pd.read_csv(full_report, encoding='ISO-8859-1', index_col=None, low_memory=False).replace(np.nan, 'blank', regex=True)
+    #Line 44 grabs all the files that contain the 'review_' + str(x) + '.csv' characters (these are basically files that contain the project IDs you are interested in).
+    matching_list=glob.glob(main_directory + '/review_' + str(x) + '.csv')
+    #Line 46 takes the latest file (based on modification time) from the 'matching_list' variable in line 44 and saves its path to 'matching_list' again.
+    matching_list = max(matching_list, key = os.path.getctime)
+    #Line 48 reads the file in path specified in line 46 into a Pandas dataframe. 
+    matching_list=pd.read_csv(matching_list, encoding='ISO-8859-1', index_col=None, low_memory=False).replace(np.nan, 'blank', regex=True)    
+    
+    #Line 51 creates a dataframe subset called 'final_audit' that picks only the rows from 'whole_full' file where '_project_id' matches the '_project_id' from the 'matching_list' dataframe you created in line 48. 
+    final_audit = whole_full[whole_full._project_id.isin(matching_list._project_id)].reset_index(drop=True)
+    
+    #'size' is the number of rows you want to draw randomly from each project_id in the final_audit file. You can set the size to any number you want.
+    #'replace = False' means randomly picking the rows without replacement. If you are okay with replacement (which could create duplicate project IDs), you should set it to 'True'.
     size = 10
     replace = False
+    Line 58-59 randomly draws the number of rows you specified in line 55, and assigns the complete output to a dataframe called 'final_audit2'.
     fn = lambda obj: obj.loc[np.random.choice(obj.index, size, replace),:]
-    final_audit=scammer_audit.groupby('_worker_id', as_index=False).apply(fn)    
+    final_audit2=final_audit.groupby('project_id', as_index=False).apply(fn)    
     
+    #Line 62-64 outputs the 'final_audit2' dataframe to an Excel workbook and puts it in a directory you specified.
     writer = pd.ExcelWriter(main_directory + '/full_report_audit' + date + '_' + str(now.hour) + '_' + str(now.minute) + '_' + str(x) + '.xlsx', engine='xlsxwriter', options={'strings_to_urls': False})
-    final_audit.to_excel(writer, sheet_name= "Sheet1")
+    final_audit2.to_excel(writer, sheet_name= "Sheet1")
     writer.save()
