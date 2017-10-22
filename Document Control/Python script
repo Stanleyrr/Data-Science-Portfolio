@@ -7,6 +7,7 @@ main_directory = '/Users/stanleyruan/Downloads/'
 document_number = [1234, 2345, 3456]
 
 for x in document_number:
+#Line 11 to 30 deals with unzipped file names that start with 'f'.
     print("Unzipping reports from job " + str(x) + ".")     
     list_of_unzipped_full_reports = glob.glob(main_directory + '/f' + str(x) + '*.zip')
     file_name = max(list_of_unzipped_full_reports, key=os.path.getctime)
@@ -27,7 +28,8 @@ for x in document_number:
             shutil.move(os.path.join(main_directory, full_report), os.path.join(unzipped_directory, original_full_report))
         except ValueError:
             shutil.move(full_report, unzipped_directory)
-        
+
+#Line 33 to 51 deals with unzipped file names that start with 'f'.        
     list_of_unzipped_agg_reports = glob.glob(main_directory + '/a' + str(x) + '*.zip')
     file_name = max(list_of_unzipped_agg_reports, key=os.path.getctime)
     with ZipFile(file_name, 'r') as zip:
