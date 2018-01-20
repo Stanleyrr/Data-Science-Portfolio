@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sat Sep 23 19:39:13 2017
-
 @author: stanleyruan
 """
 
@@ -74,7 +73,7 @@ for z in id_num:
                  elif len(a)==0:
                      pass
              
-             #Pick only nouns from the company names. The 'wn._morphy' function below converts plural nouns to singular form (As far as I know, Python semantic analysis only works with singular nouns)   
+             #Pick only nouns from the company names. The 'wn._morphy' function below converts plural nouns to singular form (As far as I know, Python semantic analysis only works with singular nouns)   
              company[index]=" ".join(company[index])
              words = company[index].split()
              company[index]=['not']
@@ -123,9 +122,9 @@ for z in id_num:
                     for y in range(len(a2)):
                         category_broken_down[y] = wn.synset(a2[y] + '.n.01')
                         if len(a1)>len(a2):
-                            semantic_sim[x*len(a2) + y]=wn.path_similarity(company_broken_down[x], category_broken_down[y])
+                            semantic_sim[x*len(a2) + y]=company_broken_down[x].wup_similarity(category_broken_down[y])
                         else:
-                            semantic_sim[y*len(a1) + x]=wn.path_similarity(company_broken_down[x], category_broken_down[y])     
+                            semantic_sim[y*len(a1) + x]=company_broken_down[x].wup_similarity(category_broken_down[y])      
              count=0
              _sum=0
              
@@ -146,30 +145,3 @@ for z in id_num:
     writer = pd.ExcelWriter('/Users/stanleyruan/Downloads/semantic_sim_summary_' + date + '_' + str(now.hour) + '_' + str(now.minute) + '.xlsx', engine='xlsxwriter')
     df.to_excel(writer, sheet_name= "Sheet1")
     writer.save()
-
-
-    #Output:
-    
-    '''
-    ID 1 has semantic score of 0.0907423604499892.
-    ID 2 has semantic score of 0.08117819671809635.
-    ID 3 has semantic score of 0.08410006697716932.
-    ID 4 has semantic score of 0.0797541288872446.
-    ID 5 has semantic score of 0.11250593514344237.
-    '''
-
-
-
-
-
-
-
-
-          
-
-
-
-
-
-
-
