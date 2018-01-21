@@ -27,19 +27,15 @@ n=data.groupby('group').size()[0]
 
 #The few lines below derive the f score and p-value for the ANOVA test:
 
-f1, p1 = stats.f_oneway(d_data['experienced_ctrl'],d_data['experienced_tst'])
-print('The f score and p-value for the ANOVA test of imerit control group and imerit testing group are: ' + str(f1) + ' and ' + str(p1) + '. If p-value is smaller than 0.05, then the groups studied in this ANOVA are statistically different.')
+f, p = stats.f_oneway(d_data['experienced_ctrl'], d_data['experienced_tst'], d_data['rookie_ctrl'],d_data['rookie_tst'])
+print('The f score and p-value for the ANOVA test of all 4 groups are: ' + str(f) + ' and ' + str(p) + '. If p-value is smaller than 0.05, then the groups studied in this ANOVA are statistically different.')
 print()
-
-f2, p2 = stats.f_oneway(d_data['rookie_ctrl'],d_data['rookie_tst'])
-print('The f score and p-value for the ANOVA test of opencrowd control group and opencrowd testing group are: ' + str(f2) + ' and ' + str(p2) + '. If p-value is smaller than 0.05, then the groups studied in this ANOVA are statistically different.')
-print()
-
+    
 
 #The following codes perform 2-sample t-test:
 
 ctrl_group_data=data[data['group']=='experienced_ctrl'].reset_index(drop=True)
-trt1_data=data[data['group']=='imerit_tst'].reset_index(drop=True)
+trt1_data=data[data['group']=='experienced_tst'].reset_index(drop=True)
 
 ctrl_group_data2=data[data['group']=='rookie_ctrl'].reset_index(drop=True)
 trt2_data=data[data['group']=='rookie_tst'].reset_index(drop=True)
@@ -51,10 +47,12 @@ ctrl2_array=ctrl_group_data2['avg_time'].values
 trt2_array=trt2_data['avg_time'].values
 
 t1, p1 = ttest_ind(ctrl_array, trt1_array, equal_var=False)
-print('The t-stat and p-value for the comparison of imerit control group and imerit testing group are: ' + str(t1) + ' and ' + str(p1) + ' .')
+print('The t-stat and p-value for the comparison of experienced control group and experienced testing group are: ' + str(t1) + ' and ' + str(p1) + ' .')
 print()
 
 t2, p2 = ttest_ind(ctrl2_array, trt2_array, equal_var=False)
-print('The t-stat and p-value for the comparison of opencrowd control group and opencrowd testing group are: ' + str(t2) + ' and ' + str(p2) + ' .')
+print('The t-stat and p-value for the comparison of rookie control group and rookie testing group are: ' + str(t2) + ' and ' + str(p2) + ' .')
+
+
 
 
