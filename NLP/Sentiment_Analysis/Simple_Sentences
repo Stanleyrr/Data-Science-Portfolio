@@ -39,5 +39,7 @@ for x in sentences:
         if classResult == 'pos':
             pos = pos + 1
         print(str(x) + ' --> ' + str(classResult))
+        #The following line returns, for each sentence, the number of positive words vs the number of negative words.
+        print("\n%s: %d vs -%d\n"%(x,pos,neg))
             
 
