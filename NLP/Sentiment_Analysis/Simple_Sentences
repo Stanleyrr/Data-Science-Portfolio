@@ -19,18 +19,14 @@ train_set = negative_features_1 + positive_features_1 + neutral_features_1
 
 classifier = NaiveBayesClassifier.train(train_set) 
 
-# Predict
-neg = 0
-pos = 0
-neu = 0
-
 sentence = "Awesome movie. I like it. It is so bad."
 sentences = sentence.lower().split('.')
-
-#This works perfectly!
 for x in sentences:
     #The line below is a good way to handle empty words 
     if x != "":
+        neg = 0
+        pos = 0
+        neu = 0
         #The line puts non-stop-words and non-empty-spaces into the variable 'words'.
         words = [word for word in x.split(" ") if word not in stopwords.words('english') if word != ""]
         classResult = classifier.classify(word_feats(words))
