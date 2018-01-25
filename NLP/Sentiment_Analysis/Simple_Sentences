@@ -2,7 +2,6 @@ import nltk.classify.util
 from nltk.classify import NaiveBayesClassifier
 from nltk.corpus import names
 from nltk.corpus import stopwords
-import re
 
 positive_vocab = [ 'awesome', 'outstanding', 'fantastic', 'terrific', 'good', 'nice', 'great', ':)' ]
 negative_vocab = [ 'bad', 'terrible','useless', 'hate', ':(', 'it is horrible', 'horrible']
